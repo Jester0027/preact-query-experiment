@@ -1,34 +1,11 @@
-import { useCallback, useEffect, useState } from 'preact/hooks';
+import { useCallback, useEffect, useMemo, useState } from 'preact/hooks';
 import { useClientContext } from './ClientContext.tsx';
-
-type QueryState<TData, TError = unknown> = {
-  data?: TData;
-  isLoading: boolean;
-  error?: TError;
-};
-
-export type UseQueryOptions = {
-  /**
-   * @desc if true, the query will be executed immediately
-   * @default true
-   */
-  immediate?: boolean;
-  /**
-   * @desc in seconds
-   * @default 180
-   */
-  lifetime?: number;
-  disableCache?: boolean;
-};
-
-const defaultOptions: UseQueryOptions = {
-  immediate: true,
-  lifetime: 180,
-  disableCache: false,
-};
+import { defaultOptions, UseQueryOptions } from './UseQueryOptions.ts';
+import { QueryState } from './QueryState.ts';
+import { CacheKey, resolveCacheKey } from './helpers/resolveCacheKey.ts';
 
 export function useQuery<TResult = unknown>(
-  cacheKey: string,
+  cacheKey: CacheKey,
   queryFn: () => Promise<Response>,
   options?: UseQueryOptions,
 ) {
@@ -36,6 +13,8 @@ export function useQuery<TResult = unknown>(
   const [query, setQuery] = useState<QueryState<TResult>>({
     isLoading: false,
   });
+
+  const _cacheKey = useMemo(() => resolveCacheKey(cacheKey), []);
 
   const { lifetime, immediate, disableCache } = {
     ...defaultOptions,
@@ -45,7 +24,7 @@ export function useQuery<TResult = unknown>(
   const runQuery = useCallback(async () => {
     try {
       if (!disableCache) {
-        const cachedData = cache.get<TResult>(cacheKey);
+        const cachedData = cache.get<TResult>(_cacheKey);
         if (cachedData !== null) {
           setQuery({ data: cachedData, isLoading: false });
           return;
@@ -58,7 +37,7 @@ export function useQuery<TResult = unknown>(
         const data: TResult = await result.json();
         setQuery({ data, isLoading: false });
         if (!disableCache) {
-          cache.set(cacheKey, data, { lifeTime: lifetime! });
+          cache.set(_cacheKey, data, { lifeTime: lifetime! });
         }
       }
     } catch (error) {
@@ -67,8 +46,8 @@ export function useQuery<TResult = unknown>(
   }, [cache, setQuery, queryFn]);
 
   const invalidate = useCallback(() => {
-    cache.unset(cacheKey);
-  }, [cache, cacheKey]);
+    cache.unset(_cacheKey);
+  }, [cache, _cacheKey]);
 
   const revalidate = useCallback(async () => {
     invalidate();

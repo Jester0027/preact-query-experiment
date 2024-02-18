@@ -1,5 +1,6 @@
 import { ClientContextProvider, useQuery } from './lib';
 import { useState } from 'preact/hooks';
+import { useQueries } from './lib/useQueries.ts';
 
 type Todo = {
   userId: number;
@@ -9,7 +10,7 @@ type Todo = {
 };
 
 export function App() {
-  const [tab, setTab] = useState<0 | 1>(0);
+  const [tab, setTab] = useState<0 | 1 | 2>(0);
 
   return (
     <ClientContextProvider>
@@ -17,10 +18,12 @@ export function App() {
         <nav>
           <button onClick={() => setTab(0)}>First tab</button>
           <button onClick={() => setTab(1)}>Second tab</button>
+          <button onClick={() => setTab(2)}>Second tab</button>
         </nav>
 
         {tab === 0 && <FirstTab />}
         {tab === 1 && <SecondTab />}
+        {tab === 2 && <ThirdTab />}
       </main>
     </ClientContextProvider>
   );
@@ -48,13 +51,51 @@ function FirstTab() {
 }
 
 function SecondTab() {
-  const { data: todo, isLoading } = useQuery<Todo>('todos:1', () =>
-    fetch('https://jsonplaceholder.typicode.com/todos/1'),
-  );
+  const { data: todos, isLoading } = useQueries<[Todo, Todo, Todo]>([
+    {
+      cacheKey: ['todos', 1],
+      queryFn: () => fetch('https://jsonplaceholder.typicode.com/todos/1'),
+    },
+    {
+      cacheKey: ['todos', 2],
+      queryFn: () => fetch('https://jsonplaceholder.typicode.com/todos/2'),
+    },
+    {
+      cacheKey: ['todos', 3],
+      queryFn: () => fetch('https://jsonplaceholder.typicode.com/todos/3'),
+    },
+  ]);
 
   if (isLoading) {
     return <div>Loading...</div>;
   }
 
-  return <div>{todo?.title}</div>;
+  return <div>{todos?.map((todo) => <p>{todo?.title}</p>)}</div>;
+}
+
+function ThirdTab() {
+  const { data: todos, isLoading } = useQueries<[Todo, Todo, Todo, Todo]>([
+    {
+      cacheKey: ['todos', 1],
+      queryFn: () => fetch('https://jsonplaceholder.typicode.com/todos/1'),
+    },
+    {
+      cacheKey: ['todos', 2],
+      queryFn: () => fetch('https://jsonplaceholder.typicode.com/todos/2'),
+    },
+    {
+      cacheKey: ['todos', 3],
+      queryFn: () => fetch('https://jsonplaceholder.typicode.com/todos/3'),
+    },
+    {
+      cacheKey: ['todos', 4],
+      queryFn: () => fetch('https://jsonplaceholder.typicode.com/todos/4'),
+    },
+  ]);
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  return <div>{todos?.map((todo) => <p>{todo?.title}</p>)}</div>;
 }
