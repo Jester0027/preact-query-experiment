@@ -27,8 +27,12 @@ export function App() {
 }
 
 function FirstTab() {
-  const { data, isLoading } = useQuery<Todo[]>('todos', () =>
-    fetch('https://jsonplaceholder.typicode.com/todos'),
+  const { data, isLoading } = useQuery<Todo[]>(
+    'todos',
+    () => fetch('https://jsonplaceholder.typicode.com/todos'),
+    {
+      disableCache: false,
+    },
   );
 
   if (isLoading) {

@@ -8,13 +8,20 @@ type ClientContext = {
 
 const ClientContext = createContext<ClientContext | null>(null);
 
-const _cache = new MemCache({ cleanPollingInterval: 1000 * 5 });
+const _cache = new MemCache();
 
+export type ClientContextProviderProps = {
+  children: ComponentChildren;
+};
+
+/**
+ * @public
+ * @param children
+ * @constructor
+ */
 export function ClientContextProvider({
   children,
-}: {
-  children: ComponentChildren;
-}) {
+}: ClientContextProviderProps) {
   const cache = useRef(_cache);
 
   return (
@@ -24,6 +31,9 @@ export function ClientContextProvider({
   );
 }
 
+/**
+ * @internal
+ */
 export function useClientContext() {
   const context = useContext(ClientContext);
 

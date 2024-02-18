@@ -7,21 +7,49 @@ type QueryState<TData, TError = unknown> = {
   error?: TError;
 };
 
+export type UseQueryOptions = {
+  /**
+   * @desc if true, the query will be executed immediately
+   * @default true
+   */
+  immediate?: boolean;
+  /**
+   * @desc in seconds
+   * @default 180
+   */
+  lifetime?: number;
+  disableCache?: boolean;
+};
+
+const defaultOptions: UseQueryOptions = {
+  immediate: true,
+  lifetime: 180,
+  disableCache: false,
+};
+
 export function useQuery<TResult = unknown>(
   cacheKey: string,
   queryFn: () => Promise<Response>,
+  options?: UseQueryOptions,
 ) {
   const [query, setQuery] = useState<QueryState<TResult>>({
     isLoading: false,
   });
   const { cache } = useClientContext();
 
+  const { lifetime, immediate, disableCache } = {
+    ...defaultOptions,
+    ...options,
+  };
+
   const fetchQuery = async () => {
     try {
-      const cachedData = cache.get<TResult>(cacheKey);
-      if (cachedData !== null) {
-        setQuery({ data: cachedData, isLoading: false });
-        return;
+      if (!disableCache) {
+        const cachedData = cache.get<TResult>(cacheKey);
+        if (cachedData !== null) {
+          setQuery({ data: cachedData, isLoading: false });
+          return;
+        }
       }
 
       setQuery({ isLoading: true });
@@ -29,7 +57,9 @@ export function useQuery<TResult = unknown>(
       if (result instanceof Response) {
         const data = await result.json();
         setQuery({ data, isLoading: false });
-        cache.set(cacheKey, data, { lifeTime: 5 });
+        if (!disableCache) {
+          cache.set(cacheKey, data, { lifeTime: lifetime! });
+        }
       }
     } catch (error) {
       setQuery({ error, isLoading: false });
@@ -37,7 +67,9 @@ export function useQuery<TResult = unknown>(
   };
 
   useEffect(() => {
-    fetchQuery().finally();
+    if (immediate) {
+      fetchQuery().finally();
+    }
   }, []);
 
   return query;
