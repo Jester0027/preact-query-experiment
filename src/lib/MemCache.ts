@@ -73,7 +73,7 @@ export class MemCache implements CacheInterface {
     return data;
   }
 
-  public set<T = any>(key: string, value: T, options: CacheOptions): void {
+  public set<T = unknown>(key: string, value: T, options: CacheOptions): void {
     this.#cache.set(key, {
       options: {
         ...options,

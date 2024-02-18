@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'preact/hooks';
+import { useCallback, useEffect, useState } from 'preact/hooks';
 import { useClientContext } from './ClientContext.tsx';
 
 type QueryState<TData, TError = unknown> = {
@@ -42,7 +42,7 @@ export function useQuery<TResult = unknown>(
     ...options,
   };
 
-  const fetchQuery = async () => {
+  const runQuery = useCallback(async () => {
     try {
       if (!disableCache) {
         const cachedData = cache.get<TResult>(cacheKey);
@@ -55,7 +55,7 @@ export function useQuery<TResult = unknown>(
       setQuery({ isLoading: true });
       const result = await queryFn();
       if (result instanceof Response) {
-        const data = await result.json();
+        const data: TResult = await result.json();
         setQuery({ data, isLoading: false });
         if (!disableCache) {
           cache.set(cacheKey, data, { lifeTime: lifetime! });
@@ -64,13 +64,13 @@ export function useQuery<TResult = unknown>(
     } catch (error) {
       setQuery({ error, isLoading: false });
     }
-  };
+  }, [cache, setQuery, queryFn]);
 
   useEffect(() => {
     if (immediate) {
-      fetchQuery().finally();
+      runQuery().finally();
     }
   }, []);
 
-  return query;
+  return { ...query, revalidate: runQuery };
 }
