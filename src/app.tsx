@@ -1,4 +1,4 @@
-import { useQuery } from './lib';
+import { ClientContextProvider, useQuery } from './lib';
 import { useState } from 'preact/hooks';
 
 type Todo = {
@@ -12,15 +12,17 @@ export function App() {
   const [tab, setTab] = useState<0 | 1>(0);
 
   return (
-    <main class="container">
-      <nav>
-        <button onClick={() => setTab(0)}>First tab</button>
-        <button onClick={() => setTab(1)}>Second tab</button>
-      </nav>
+    <ClientContextProvider>
+      <main class="container">
+        <nav>
+          <button onClick={() => setTab(0)}>First tab</button>
+          <button onClick={() => setTab(1)}>Second tab</button>
+        </nav>
 
-      {tab === 0 && <FirstTab />}
-      {tab === 1 && <SecondTab />}
-    </main>
+        {tab === 0 && <FirstTab />}
+        {tab === 1 && <SecondTab />}
+      </main>
+    </ClientContextProvider>
   );
 }
 

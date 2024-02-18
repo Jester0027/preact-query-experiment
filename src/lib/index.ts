@@ -1,1 +1,2 @@
-export { useQuery } from './hooks/use-query';
+export { useQuery } from './use-query.ts';
+export { ClientContextProvider } from './ClientContext.tsx';
