@@ -1,6 +1,6 @@
 import { ComponentChildren, createContext } from 'preact';
 import { MemCache } from './MemCache.ts';
-import { useContext, useMemo } from 'preact/hooks';
+import { useContext, useEffect, useMemo } from 'preact/hooks';
 
 type ClientContext = {
   cache: MemCache;
@@ -28,6 +28,12 @@ export function ClientContextProvider({
     () => new MemCache({ cleanPollingInterval: cacheCleanPollingInterval }),
     [],
   );
+
+  useEffect(() => {
+    return () => {
+      cache.dispose();
+    };
+  }, []);
 
   return (
     <ClientContext.Provider value={{ cache }}>

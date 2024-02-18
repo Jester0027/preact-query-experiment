@@ -33,10 +33,11 @@ export class MemCache implements CacheInterface {
   readonly #defaultConfig: CacheConfig = {
     cleanPollingInterval: 5 * MINUTE,
   };
+  readonly #intervalId: number;
 
   constructor(config?: Partial<CacheConfig>) {
     this.#defaultConfig = { ...this.#defaultConfig, ...config };
-    setInterval(() => {
+    this.#intervalId = setInterval(() => {
       this.#cache.forEach((value, key) => {
         if (value.options.lifeTime < Date.now()) {
           this.#cache.delete(key);
@@ -92,5 +93,10 @@ export class MemCache implements CacheInterface {
         this.#cache.delete(key);
       }
     });
+  }
+
+  dispose(): void {
+    this.#cache.clear();
+    clearInterval(this.#intervalId);
   }
 }

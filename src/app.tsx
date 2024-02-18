@@ -10,22 +10,27 @@ type Todo = {
 };
 
 export function App() {
-  const [tab, setTab] = useState<0 | 1 | 2>(0);
-
   return (
     <ClientContextProvider>
-      <main class="container">
-        <nav>
-          <button onClick={() => setTab(0)}>First tab</button>
-          <button onClick={() => setTab(1)}>Second tab</button>
-          <button onClick={() => setTab(2)}>Second tab</button>
-        </nav>
-
-        {tab === 0 && <FirstTab />}
-        {tab === 1 && <SecondTab />}
-        {tab === 2 && <ThirdTab />}
-      </main>
+      <Tabs />
     </ClientContextProvider>
+  );
+}
+
+function Tabs() {
+  const [tab, setTab] = useState<0 | 1 | 2>(0);
+  return (
+    <main className="container">
+      <nav>
+        <button onClick={() => setTab(0)}>First tab</button>
+        <button onClick={() => setTab(1)}>Second tab</button>
+        <button onClick={() => setTab(2)}>Second tab</button>
+      </nav>
+
+      {tab === 0 && <FirstTab />}
+      {tab === 1 && <SecondTab />}
+      {tab === 2 && <ThirdTab />}
+    </main>
   );
 }
 
