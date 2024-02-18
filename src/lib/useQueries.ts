@@ -110,10 +110,7 @@ export function useQueries<TResult extends any[]>(
           const queryToMutate = remainingQueriesToCache?.find(
             (q) => q.cacheKey === query.cacheKey,
           );
-          if (queryToMutate) {
-            query.cachedValue = queryToMutate.cachedValue;
-          }
-          return query.cachedValue!;
+          return queryToMutate?.cachedValue ?? query.cachedValue!;
         })!;
       }
       setQueryState({ data, isLoading: false });
