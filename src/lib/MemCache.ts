@@ -37,7 +37,6 @@ export class MemCache implements CacheInterface {
   constructor(config?: Partial<CacheConfig>) {
     this.#defaultConfig = { ...this.#defaultConfig, ...config };
     setInterval(() => {
-      console.log('cleaning up cache');
       this.#cache.forEach((value, key) => {
         if (value.options.lifeTime < Date.now()) {
           this.#cache.delete(key);

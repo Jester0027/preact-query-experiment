@@ -1,6 +1,6 @@
 import { ComponentChildren, createContext } from 'preact';
 import { MemCache } from './MemCache.ts';
-import { useContext, useRef } from 'preact/hooks';
+import { useContext, useMemo } from 'preact/hooks';
 
 type ClientContext = {
   cache: MemCache;
@@ -8,24 +8,28 @@ type ClientContext = {
 
 const ClientContext = createContext<ClientContext | null>(null);
 
-const _cache = new MemCache();
-
 export type ClientContextProviderProps = {
   children: ComponentChildren;
+  cacheCleanPollingInterval?: number;
 };
 
 /**
  * @public
  * @param children
+ * @param cacheCleanPollingInterval
  * @constructor
  */
 export function ClientContextProvider({
   children,
+  cacheCleanPollingInterval = 1000 * 60 * 5,
 }: ClientContextProviderProps) {
-  const cache = useRef(_cache);
+  const cache = useMemo(
+    () => new MemCache({ cleanPollingInterval: cacheCleanPollingInterval }),
+    [],
+  );
 
   return (
-    <ClientContext.Provider value={{ cache: cache.current }}>
+    <ClientContext.Provider value={{ cache }}>
       {children}
     </ClientContext.Provider>
   );
