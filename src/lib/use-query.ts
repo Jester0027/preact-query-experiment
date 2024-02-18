@@ -32,10 +32,10 @@ export function useQuery<TResult = unknown>(
   queryFn: () => Promise<Response>,
   options?: UseQueryOptions,
 ) {
+  const { cache } = useClientContext();
   const [query, setQuery] = useState<QueryState<TResult>>({
     isLoading: false,
   });
-  const { cache } = useClientContext();
 
   const { lifetime, immediate, disableCache } = {
     ...defaultOptions,
@@ -66,11 +66,20 @@ export function useQuery<TResult = unknown>(
     }
   }, [cache, setQuery, queryFn]);
 
+  const invalidate = useCallback(() => {
+    cache.unset(cacheKey);
+  }, [cache, cacheKey]);
+
+  const revalidate = useCallback(async () => {
+    invalidate();
+    await runQuery();
+  }, [invalidate, runQuery]);
+
   useEffect(() => {
     if (immediate) {
       runQuery().finally();
     }
   }, []);
 
-  return { ...query, revalidate: runQuery };
+  return { ...query, runQuery, invalidate, revalidate };
 }

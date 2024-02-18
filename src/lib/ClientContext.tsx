@@ -15,6 +15,7 @@ export type ClientContextProviderProps = {
 
 /**
  * @public
+ * @description Holds the cache instance and provides it to the useQuery hook.
  * @param children
  * @param cacheCleanPollingInterval
  * @constructor

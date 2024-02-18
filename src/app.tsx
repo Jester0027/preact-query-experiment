@@ -48,5 +48,13 @@ function FirstTab() {
 }
 
 function SecondTab() {
-  return <div>Second tab</div>;
+  const { data: todo, isLoading } = useQuery<Todo>('todos:1', () =>
+    fetch('https://jsonplaceholder.typicode.com/todos/1'),
+  );
+
+  if (isLoading) {
+    return <div>Loading...</div>;
+  }
+
+  return <div>{todo?.title}</div>;
 }
